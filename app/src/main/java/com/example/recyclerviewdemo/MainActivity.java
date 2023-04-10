@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements MyAdapter.OnGroupHeaderClickListener
+public class MainActivity extends AppCompatActivity
 {
     private RecyclerView recyclerView;
     private MyAdapter adapter;
@@ -49,14 +49,14 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.OnGroup
             dataList.add(new Group(headerData, itemDataList));
         }
 
-        // 将假数据绑定到Adapter上
-        adapter = new MyAdapter(this, dataList);
-        adapter.setOnGroupHeaderClickListener(this);  // 设置OnGroupHeaderClickListener的实例
-
         // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
+
+        // 将假数据绑定到Adapter上
+        adapter = new MyAdapter(this, dataList,recyclerView);
+
+
         recyclerView.setAdapter(adapter);
-        adapter.setRecyclerView(recyclerView);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
         {
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.OnGroup
                     {
                         int headerPosition = count;
                         int firstItemPosition = headerPosition + 1;
-                        int lastItemPosition = firstItemPosition + group.getItemCount() - 2;
+                        int lastItemPosition = firstItemPosition + group.getItemCount() - 1;
                         if (firstVisiblePosition >= firstItemPosition && lastVisiblePosition <= lastItemPosition)
                         { // 当前组的所有项都在可见区域内
                             MyAdapter.HeaderViewHolder headerViewHolder = adapter.getHeaderViewHolder(headerPosition);
@@ -113,13 +113,5 @@ public class MainActivity extends AppCompatActivity implements MyAdapter.OnGroup
                 }
             }
         });
-    }
-
-    @Override
-    public void onGroupHeaderClick(int groupPosition)
-    {
-        // 当组标题被点击时，滚动到该组的起始位置
-        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        layoutManager.scrollToPositionWithOffset(groupPosition, 0);
     }
 }
