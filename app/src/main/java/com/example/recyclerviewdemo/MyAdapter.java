@@ -19,11 +19,28 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int VIEW_TYPE_ITEM = 1;
     private final List<Group> mDataList;
     private final Context mContext;
+    private RecyclerView mRecyclerView;
+    private OnGroupHeaderClickListener mOnGroupHeaderClickListener;
 
     public MyAdapter(Context context, List<Group> dataList)
     {
         mContext = context;
         mDataList = dataList;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView)
+    {
+        mRecyclerView = recyclerView;
+    }
+
+    public void setOnGroupHeaderClickListener(OnGroupHeaderClickListener listener)
+    {
+        mOnGroupHeaderClickListener = listener;
+    }
+
+    public List<Group> getDataList()
+    {
+        return mDataList;
     }
 
     @Override
@@ -72,7 +89,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (viewType == VIEW_TYPE_HEADER)
         {
             View view = LayoutInflater.from(mContext).inflate(R.layout.header_recycler_view, parent, false);
-            return new HeaderViewHolder(view);
+            return new HeaderViewHolder(view, mOnGroupHeaderClickListener);
         }
         else if (viewType == VIEW_TYPE_ITEM)
         {
@@ -115,14 +132,25 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
-    private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    public HeaderViewHolder getHeaderViewHolder(int position)
+    {
+        RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
+        if (holder instanceof HeaderViewHolder)
+        {
+            return (HeaderViewHolder) holder;
+        }
+        return null;
+    }
+
+    public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
         private final TextView income;
         private final TextView expense;
         private final ImageView toggle;
+        private OnGroupHeaderClickListener mOnGroupHeaderClickListener;
 
-        public HeaderViewHolder(View itemView)
+        public HeaderViewHolder(View itemView, OnGroupHeaderClickListener onGroupHeaderClickListener)
         {
             super(itemView);
             date = itemView.findViewById(R.id.header_date);
@@ -130,6 +158,9 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             expense = itemView.findViewById(R.id.header_expense);
             toggle = itemView.findViewById(R.id.header_button);
             itemView.setOnClickListener(this);   // 整个HeaderViewHolder的点击事件绑定
+            mOnGroupHeaderClickListener = onGroupHeaderClickListener;
+
+            itemView.setElevation(8);  // 设置z轴高度为8dp
         }
 
         public void bind(Group group)
@@ -152,6 +183,10 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 {
                     group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
                     updateVisibility();  // 更新视图
+                    if (mOnGroupHeaderClickListener != null)
+                    {
+                        mOnGroupHeaderClickListener.onGroupHeaderClick(count);
+                    }
                     return;
                 }
                 count++;
@@ -185,5 +220,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             name.setText(itemData.getName());
             amount.setText(String.format(Locale.getDefault(), "%.2f", itemData.getAmount()));
         }
+    }
+
+    public interface OnGroupHeaderClickListener
+    {
+
+        void onGroupHeaderClick(int groupPosition);
     }
 }
