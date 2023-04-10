@@ -33,7 +33,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         for (Group group : mDataList)
         {
             count++;  // 统计每个组的头部
-            if (group.isExpanded().get())
+            if (group.isExpanded())
             {
                 count += group.getItemCount() - 1;  // 统计每个组展开后的项数
             }
@@ -52,7 +52,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 return VIEW_TYPE_HEADER;  // 返回头部视图类型
             }
             ++count;
-            if (group.isExpanded().get())  // 如果这个组是展开状态
+            if (group.isExpanded())  // 如果这个组是展开状态
             {
                 int size = group.getItemCount();  // 获取该组中列表项的数量
                 if (position < count + size - 1)  // 如果当前位置在该组的范围内
@@ -95,7 +95,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 break;
             }
             count++;
-            if (group.isExpanded().get())
+            if (group.isExpanded())
             {
                 int size = group.getItemCount();
                 if (position < count + size - 1)
@@ -138,7 +138,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             date.setText(headerData.getDate());
             income.setText(String.format(Locale.getDefault(), "+%.2f", headerData.getIncome()));
             expense.setText(String.format(Locale.getDefault(), "-%.2f", headerData.getExpense()));
-            toggle.setImageResource(group.isExpanded().get() ? R.drawable.expand_less : R.drawable.expand_more);
+            toggle.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
         }
 
         @Override
@@ -150,12 +150,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             {
                 if (position == count)
                 {
-                    group.setExpanded(!group.isExpanded().get());  // 将分组的isExpanded状态取反
+                    group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
                     updateVisibility();  // 更新视图
                     return;
                 }
                 count++;
-                if (group.isExpanded().get())
+                if (group.isExpanded())
                 {
                     int size = group.getItemCount();
                     if (position < count + size - 1) return;
