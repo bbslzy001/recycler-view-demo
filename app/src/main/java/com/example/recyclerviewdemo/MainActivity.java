@@ -34,26 +34,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration()
-        {
-            @Override
-            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
-            {
-                super.onDraw(c, parent, state);
-            }
-
-            @Override
-            public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
-            {
-                super.onDrawOver(c, parent, state);
-            }
-
-            @Override
-            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
-            {
-                super.getItemOffsets(outRect, view, parent, state);
-            }
-        });
+        recyclerView.addItemDecoration(new MyItemDecoration(headerHeight, headerPositionList, adapter));
     }
 
     private List<Group> getFakeData()

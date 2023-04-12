@@ -110,7 +110,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
         private final TextView income;
