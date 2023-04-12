@@ -1,9 +1,15 @@
 package com.example.recyclerviewdemo;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,6 +35,31 @@ public class MainActivity extends AppCompatActivity
         // 初始化RecyclerView
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setAdapter(adapter);
+
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration()
+        {
+            @Override
+            public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
+            {
+                super.onDraw(c, parent, state);
+            }
+
+            @Override
+            public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
+            {
+                super.onDrawOver(c, parent, state);
+
+                Paint paint = new Paint();
+                paint.setColor(Color.BLUE);
+                c.drawRect(0,0,parent.getRight(),60,paint);
+            }
+
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
+            {
+                super.getItemOffsets(outRect, view, parent, state);
+            }
+        });
     }
 
     private List<Group> getFakeData()
