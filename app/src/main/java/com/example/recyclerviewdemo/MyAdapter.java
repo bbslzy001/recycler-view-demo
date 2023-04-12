@@ -17,20 +17,20 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_ITEM = 1;
-    private final List<Group> mDataList;
-    private final Context mContext;
+    private final List<Group> dataList;
+    private final Context context;
 
     public MyAdapter(Context context, List<Group> dataList)
     {
-        mContext = context;
-        mDataList = dataList;
+        this.context = context;
+        this.dataList = dataList;
     }
 
     @Override
     public int getItemCount()
     {
         int count = 0;
-        for (Group group : mDataList)
+        for (Group group : dataList)
         {
             count++;  // 统计每个组的头部
             if (group.isExpanded())
@@ -45,7 +45,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemViewType(int position)
     {
         int count = 0;  // 定义一个计数器
-        for (Group group : mDataList)  // 遍历数据列表中的每一个组
+        for (Group group : dataList)  // 遍历数据列表中的每一个组
         {
             if (position == count)  // 如果当前位置等于计数器的值，则说明这是一个组的头部
             {
@@ -71,12 +71,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
         if (viewType == VIEW_TYPE_HEADER)
         {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.header_recycler_view, parent, false);
+            View view = LayoutInflater.from(context).inflate(R.layout.header_recycler_view, parent, false);
             return new HeaderViewHolder(view);
         }
         else if (viewType == VIEW_TYPE_ITEM)
         {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_recycler_view, parent, false);
+            View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_view, parent, false);
             return new ItemViewHolder(view);
         }
         throw new IllegalArgumentException("Invalid view type");
@@ -86,7 +86,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
         int count = 0;
-        for (Group group : mDataList)
+        for (Group group : dataList)
         {
             if (position == count)
             {
@@ -108,11 +108,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 count += size - 1;
             }
         }
-    }
-
-    private void updateVisibility()
-    {
-        notifyDataSetChanged();
     }
 
     private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
@@ -146,12 +141,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         {
             int position = getAdapterPosition();  // 获取ViewHolder的位置
             int count = 0;  // 计算当前分组在列表中的起始位置
-            for (Group group : mDataList)
+            for (Group group : dataList)
             {
                 if (position == count)
                 {
                     group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-                    updateVisibility();  // 更新视图
+                    notifyDataSetChanged();  // 更新视图
                     return;
                 }
                 count++;
