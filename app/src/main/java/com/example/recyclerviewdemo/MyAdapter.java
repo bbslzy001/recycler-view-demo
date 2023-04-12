@@ -8,12 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -21,12 +19,10 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private static final int VIEW_TYPE_ITEM = 1;
     private final List<Group> mDataList;
     private final Context mContext;
-    private final RecyclerView mRecyclerView;
 
-    public MyAdapter(Context context, RecyclerView recyclerView, List<Group> dataList)
+    public MyAdapter(Context context, List<Group> dataList)
     {
         mContext = context;
-        mRecyclerView = recyclerView;
         mDataList = dataList;
     }
 
@@ -119,11 +115,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    private void updateVisibility()
-    {
-        notifyDataSetChanged();
-    }
-
     public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
@@ -139,7 +130,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             expense = itemView.findViewById(R.id.header_expense);
             toggle = itemView.findViewById(R.id.header_button);
             itemView.setOnClickListener(this);   // 整个HeaderViewHolder的点击事件绑定
-
             itemView.setElevation(8);  // 设置z轴高度为8dp
         }
 
@@ -162,9 +152,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 if (position == count)
                 {
                     group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-                    updateVisibility();  // 更新视图
-                    LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
-                    Objects.requireNonNull(layoutManager).scrollToPositionWithOffset(count, 0);
+                    notifyDataSetChanged();  // 更新视图
                     return;
                 }
                 count++;

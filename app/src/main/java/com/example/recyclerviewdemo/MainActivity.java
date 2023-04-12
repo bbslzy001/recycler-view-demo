@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView = findViewById(R.id.recycler_view);
 
         // 将假数据绑定到Adapter上
-        adapter = new MyAdapter(this, recyclerView, getFakeData());
+        adapter = new MyAdapter(this, getFakeData());
         recyclerView.setAdapter(adapter);
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -86,12 +86,12 @@ public class MainActivity extends AppCompatActivity
         return dataList;
     }
 
-    private List<Integer> initOffsetList(List<Group> list, int ooo)
+    private List<Integer> initOffsetList(List<Group> list, int allCount)
     {
         List<Integer> offsetList = new ArrayList<>();
         int headerIndex = -1;
         int itemCount = 0;
-        for (int position = 0; position < ooo; ++position)
+        for (int position = 0; position < allCount; ++position)
         {
             int count = 0;
             for (Group group : list)
@@ -120,12 +120,12 @@ public class MainActivity extends AppCompatActivity
         return offsetList;
     }
 
-    private List<Integer> initHeaderPosition(List<Group> list, int ooo)
+    private List<Integer> initHeaderPosition(List<Group> list, int allCount)
     {
         List<Integer> headerPositionList = new ArrayList<>();
         int headerIndex = -1;
         int itemCount = 0;
-        for (int position = 0; position < ooo; ++position)
+        for (int position = 0; position < allCount; ++position)
         {
             int count = 0;
             for (Group group : list)
