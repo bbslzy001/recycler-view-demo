@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
@@ -48,10 +46,6 @@ public class MainActivity extends AppCompatActivity
             public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
             {
                 super.onDrawOver(c, parent, state);
-
-                Paint paint = new Paint();
-                paint.setColor(Color.BLUE);
-                c.drawRect(0,0,parent.getRight(),60,paint);
             }
 
             @Override
