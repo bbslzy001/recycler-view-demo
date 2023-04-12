@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     private List<Group> getFakeData()
     {
         List<Group> dataList = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
         Random random = new Random();
         double totalIncome, totalExpense;
         for (int i = 0; i < 10; i++)
