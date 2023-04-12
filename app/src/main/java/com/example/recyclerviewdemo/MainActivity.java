@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity
@@ -39,15 +40,10 @@ public class MainActivity extends AppCompatActivity
             {
                 super.onScrolled(recyclerView, dx, dy);
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();  // index
-                Log.d("test", "first: " + firstVisiblePosition);
+                int firstVisiblePosition = Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
                 List<Integer> offsetList = initOffsetList(adapter.getDataList(), adapter.getItemCount());
                 List<Integer> headerPositionList = initHeaderPosition(adapter.getDataList(), adapter.getItemCount());
-                Log.d("test", "list: " + offsetList);
-                Log.d("test", "listt: " + headerPositionList);
                 int headerPosition = offsetList.get(firstVisiblePosition);
-                Log.d("test", "header: " + headerPosition);
-
                 for (int position : headerPositionList)
                 {
                     MyAdapter.HeaderViewHolder headerViewHolder = (MyAdapter.HeaderViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
@@ -55,14 +51,10 @@ public class MainActivity extends AppCompatActivity
                     {
                         if (position == headerPosition)
                         {
-                            Log.d("test", "getPaddingTop " + recyclerView.getPaddingTop());
-                            Log.d("test", "getTop: " + headerViewHolder.itemView.getTop());
-                            Log.d("test", "onScrolled: " + Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
                             headerViewHolder.itemView.setTranslationY(Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
                         }
                         else headerViewHolder.itemView.setTranslationY(0);
                     }
-
                 }
             }
         });
