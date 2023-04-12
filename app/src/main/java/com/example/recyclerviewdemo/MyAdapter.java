@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -22,11 +23,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private final Context mContext;
     private final RecyclerView mRecyclerView;
 
-    public MyAdapter(Context context, List<Group> dataList,RecyclerView recyclerView)
+    public MyAdapter(Context context, RecyclerView recyclerView, List<Group> dataList)
     {
         mContext = context;
-        mDataList = dataList;
         mRecyclerView = recyclerView;
+        mDataList = dataList;
     }
 
     public List<Group> getDataList()
@@ -123,16 +124,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
-    public HeaderViewHolder getHeaderViewHolder(int position)
-    {
-        RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
-        if (holder instanceof HeaderViewHolder)
-        {
-            return (HeaderViewHolder) holder;
-        }
-        return null;
-    }
-
     public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
@@ -172,8 +163,8 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 {
                     group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
                     updateVisibility();  // 更新视图
-                        LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
-                        layoutManager.scrollToPositionWithOffset(count, 0);
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+                    Objects.requireNonNull(layoutManager).scrollToPositionWithOffset(count, 0);
                     return;
                 }
                 count++;

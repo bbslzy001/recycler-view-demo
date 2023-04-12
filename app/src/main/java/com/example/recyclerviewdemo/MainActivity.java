@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ public class MainActivity extends AppCompatActivity
 {
     private RecyclerView recyclerView;
     private MyAdapter adapter;
-    private List<Group> dataList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -25,8 +25,52 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 创建假数据
-        dataList = new ArrayList<>();
+        // 初始化RecyclerView
+        recyclerView = findViewById(R.id.recycler_view);
+
+        // 将假数据绑定到Adapter上
+        adapter = new MyAdapter(this, recyclerView, getFakeData());
+        recyclerView.setAdapter(adapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
+        {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy)
+            {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();  // index
+                Log.d("test", "first: " + firstVisiblePosition);
+                List<Integer> offsetList = initOffsetList(adapter.getDataList(), adapter.getItemCount());
+                List<Integer> headerPositionList = initHeaderPosition(adapter.getDataList(), adapter.getItemCount());
+                Log.d("test", "list: " + offsetList);
+                Log.d("test", "listt: " + headerPositionList);
+                int headerPosition = offsetList.get(firstVisiblePosition);
+                Log.d("test", "header: " + headerPosition);
+
+                for (int position : headerPositionList)
+                {
+                    MyAdapter.HeaderViewHolder headerViewHolder = (MyAdapter.HeaderViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+                    if (headerViewHolder != null)
+                    {
+                        if (position == headerPosition)
+                        {
+                            Log.d("test", "getPaddingTop " + recyclerView.getPaddingTop());
+                            Log.d("test", "getTop: " + headerViewHolder.itemView.getTop());
+                            Log.d("test", "onScrolled: " + Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
+                            headerViewHolder.itemView.setTranslationY(Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
+                        }
+                        else headerViewHolder.itemView.setTranslationY(0);
+                    }
+
+                }
+            }
+        });
+    }
+
+    private List<Group> getFakeData()
+    {
+        List<Group> dataList = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         Random random = new Random();
         double totalIncome, totalExpense;
@@ -48,70 +92,74 @@ public class MainActivity extends AppCompatActivity
             HeaderData headerData = new HeaderData(dateStr, totalIncome, totalExpense);
             dataList.add(new Group(headerData, itemDataList));
         }
+        return dataList;
+    }
 
-        // 初始化RecyclerView
-        recyclerView = findViewById(R.id.recycler_view);
-
-        // 将假数据绑定到Adapter上
-        adapter = new MyAdapter(this, dataList,recyclerView);
-
-
-        recyclerView.setAdapter(adapter);
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
+    private List<Integer> initOffsetList(List<Group> list, int ooo)
+    {
+        List<Integer> offsetList = new ArrayList<>();
+        int headerIndex = -1;
+        int itemCount = 0;
+        for (int position = 0; position < ooo; ++position)
         {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy)
+            int count = 0;
+            for (Group group : list)
             {
-                super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
-                int lastVisiblePosition = layoutManager.findLastVisibleItemPosition();
-                int count = 0;
-                for (Group group : adapter.getDataList())
+                if (position == count)
                 {
-                    if (group.isExpanded())
+                    ++headerIndex;
+                    headerIndex += itemCount;
+                    itemCount = 0;
+                    break;
+                }
+                count++;
+                if (group.isExpanded())
+                {
+                    int size = group.getItemCount();
+                    if (position < count + size - 1)
                     {
-                        int headerPosition = count;
-                        int firstItemPosition = headerPosition + 1;
-                        int lastItemPosition = firstItemPosition + group.getItemCount() - 1;
-                        if (firstVisiblePosition >= firstItemPosition && lastVisiblePosition <= lastItemPosition)
-                        { // 当前组的所有项都在可见区域内
-                            MyAdapter.HeaderViewHolder headerViewHolder = adapter.getHeaderViewHolder(headerPosition);
-                            if (headerViewHolder != null)
-                            {
-                                // 如果当前组的HeaderViewHolder存在，则设置HeaderViewHolder的悬浮状态为true
-                                headerViewHolder.itemView.setTranslationY(Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
-                            }
-                            return;
-                        }
-                        else if (firstVisiblePosition <= firstItemPosition && lastVisiblePosition >= firstItemPosition)
-                        { // 当前组的第一项在可见区域内
-                            MyAdapter.HeaderViewHolder headerViewHolder = adapter.getHeaderViewHolder(headerPosition);
-                            if (headerViewHolder != null)
-                            {
-                                // 如果当前组的HeaderViewHolder存在，则设置HeaderViewHolder的悬浮状态为true
-                                headerViewHolder.itemView.setTranslationY(Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
-                            }
-                        }
-                        else if (firstVisiblePosition <= lastItemPosition && lastVisiblePosition >= lastItemPosition)
-                        { // 当前组的最后一项在可见区域内
-                            MyAdapter.HeaderViewHolder headerViewHolder = adapter.getHeaderViewHolder(headerPosition);
-                            if (headerViewHolder != null)
-                            {
-                                // 如果当前组的HeaderViewHolder存在，则设置HeaderViewHolder的悬浮状态为false
-                                headerViewHolder.itemView.setTranslationY(0);
-                            }
-                        }
+                        ++itemCount;
+                        break;
                     }
-                    count++;
-                    if (group.isExpanded())
-                    {
-                        int size = group.getItemCount();
-                        count += size - 1;
-                    }
+                    count += size - 1;
                 }
             }
-        });
+            offsetList.add(headerIndex);
+        }
+        return offsetList;
+    }
+
+    private List<Integer> initHeaderPosition(List<Group> list, int ooo)
+    {
+        List<Integer> headerPositionList = new ArrayList<>();
+        int headerIndex = -1;
+        int itemCount = 0;
+        for (int position = 0; position < ooo; ++position)
+        {
+            int count = 0;
+            for (Group group : list)
+            {
+                if (position == count)
+                {
+                    ++headerIndex;
+                    headerIndex += itemCount;
+                    headerPositionList.add(headerIndex);
+                    itemCount = 0;
+                    break;
+                }
+                count++;
+                if (group.isExpanded())
+                {
+                    int size = group.getItemCount();
+                    if (position < count + size - 1)
+                    {
+                        ++itemCount;
+                        break;
+                    }
+                    count += size - 1;
+                }
+            }
+        }
+        return headerPositionList;
     }
 }
