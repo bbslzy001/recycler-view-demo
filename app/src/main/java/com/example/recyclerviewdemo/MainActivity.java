@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,15 +50,21 @@ public class MainActivity extends AppCompatActivity
                     MyAdapter.HeaderViewHolder headerViewHolder = (MyAdapter.HeaderViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
                     if (headerViewHolder != null)
                     {
+                        Log.d("test", "not null");
                         if (position == headerPosition)
                         {
                             headerViewHolder.itemView.setTranslationY(Math.max(0, recyclerView.getPaddingTop() - headerViewHolder.itemView.getTop()));
                         }
                         else headerViewHolder.itemView.setTranslationY(0);
                     }
+                    else {
+                        Log.d("test", "null");
+                    }
                 }
             }
         });
+
+        recyclerView.getRecycledViewPool().setMaxRecycledViews(0, 31);
     }
 
     private List<Group> getFakeData()
