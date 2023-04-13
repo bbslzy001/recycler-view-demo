@@ -1,13 +1,9 @@
 package com.example.recyclerviewdemo;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,7 +30,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.addItemDecoration(new MyItemDecoration(this, adapter));
+        recyclerView.addItemDecoration(new MyItemDecoration(adapter));
     }
 
     private List<Group> getFakeData()

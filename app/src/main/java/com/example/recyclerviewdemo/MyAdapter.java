@@ -10,13 +10,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
-    private static final int VIEW_TYPE_HEADER = 0;
-    private static final int VIEW_TYPE_ITEM = 1;
+    public static final int VIEW_TYPE_HEADER = 0;
+    public static final int VIEW_TYPE_ITEM = 1;
     private final List<Group> dataList;
     private final Context context;
 
@@ -115,7 +116,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
         private final TextView income;
@@ -185,5 +186,39 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             name.setText(itemData.getName());
             amount.setText(String.format(Locale.getDefault(), "%.2f", itemData.getAmount()));
         }
+    }
+
+    /**
+     * 计算所有 view 对应的 group 下标
+     */
+    public List<Integer> getGroupIndexList()
+    {
+        int allCount = getItemCount();
+        List<Integer> offsetList = new ArrayList<>();
+        int headerIndex = -1;
+        for (int position = 0; position < allCount; ++position)
+        {
+            int count = 0;
+            for (Group group : dataList)
+            {
+                if (position == count)
+                {
+                    ++headerIndex;
+                    break;
+                }
+                count++;
+                if (group.isExpanded())
+                {
+                    int size = group.getItemCount();
+                    if (position < count + size - 1)
+                    {
+                        break;
+                    }
+                    count += size - 1;
+                }
+            }
+            offsetList.add(headerIndex);
+        }
+        return offsetList;
     }
 }
