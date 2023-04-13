@@ -1,6 +1,7 @@
 package com.example.recyclerviewdemo;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +117,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+    public void onHeaderClick(Group group)
+    {
+        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
+        notifyDataSetChanged();  // 更新视图
+    }
+
     private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
@@ -151,8 +158,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             {
                 if (position == count)
                 {
-                    group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-                    notifyDataSetChanged();  // 更新视图
+                    onHeaderClick(group);
                     return;
                 }
                 count++;
@@ -166,7 +172,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    private static class ItemViewHolder extends RecyclerView.ViewHolder
+    private static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView time;
         private final TextView name;
@@ -178,6 +184,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             time = itemView.findViewById(R.id.item_time);
             name = itemView.findViewById(R.id.item_name);
             amount = itemView.findViewById(R.id.item_amount);
+            itemView.setOnClickListener(this);   // 整个ItemViewHolder的点击事件绑定
         }
 
         public void bind(ItemData itemData)
@@ -185,6 +192,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             time.setText(itemData.getTime());
             name.setText(itemData.getName());
             amount.setText(String.format(Locale.getDefault(), "%.2f", itemData.getAmount()));
+        }
+
+        @Override
+        public void onClick(View view)
+        {
+            Log.d("test", "onClick: "+amount.getText());
         }
     }
 

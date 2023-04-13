@@ -2,15 +2,10 @@ package com.example.recyclerviewdemo;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.text.TextPaint;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,11 +18,12 @@ import java.util.Objects;
 public class MyItemDecoration extends RecyclerView.ItemDecoration
 {
     private final MyAdapter adapter;
-
+    private Context context;
     private HeaderInfo headerInfo;
 
-    public MyItemDecoration(MyAdapter adapter)
+    public MyItemDecoration(Context context, MyAdapter adapter)
     {
+        this.context = context;
         this.adapter = adapter;
     }
 
@@ -45,57 +41,34 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration
         int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的item的类型
         if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是组的头部
         {
-            if (headerInfo == null) headerInfo = new HeaderInfo(parent.getChildAt(firstVisiblePosition));
+            if (headerInfo == null)
+                headerInfo = new HeaderInfo(parent.getChildAt(firstVisiblePosition));
         }
 
         List<Integer> offsetList = adapter.getGroupIndexList();  // 获取所有 view 对应的 group 下标
         Group group = adapter.getDataList().get(offsetList.get(firstVisiblePosition)); // 获取当前组对象
-        drawHeader(c, group);  // 在画布上绘制上一个组头部视图
+
+        drawHeader(c, parent, group);  // 在画布上绘制上一个组头部视图
     }
 
-    private void drawHeader(Canvas c, Group group)
+    private void drawHeader(Canvas c, RecyclerView parent, Group group)
     {
-        Paint paint = new Paint();
-        paint.setColor(headerInfo.headerColor); // 设置背景色
+        // 创建一个新的 View 对象，并将头部内容绘制到该 View 上
+        View headerView = LayoutInflater.from(context).inflate(R.layout.header_recycler_view, parent, false);
+        TextView dateTextView = headerView.findViewById(R.id.header_date);
+        TextView incomeTextView = headerView.findViewById(R.id.header_income);
+        TextView expenseTextView = headerView.findViewById(R.id.header_expense);
+        ImageView arrowImageView = headerView.findViewById(R.id.header_button);
+        dateTextView.setText(group.getHeaderData().getDate());
+        incomeTextView.setText(String.format(Locale.getDefault(), "+%.2f", group.getHeaderData().getIncome()));
+        expenseTextView.setText(String.format(Locale.getDefault(), "-%.2f", group.getHeaderData().getExpense()));
+        arrowImageView.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
 
-        TextPaint textPaint = new TextPaint();
-        textPaint.setTextSize(45);
-        textPaint.setColor(Color.DKGRAY);
-        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
-
-        // 绘制一个矩形作为背景
-        c.drawRect(headerInfo.headerLeft, headerInfo.headerTop, headerInfo.headerRight, headerInfo.headerBottom, paint);
-
-        // 绘制日期文本
-        c.drawText(group.getHeaderData().getDate(), headerInfo.headerLeft + 16, headerInfo.headerTop + 60, textPaint);
-
-        // 绘制收入文本
-        c.drawText(String.format(Locale.getDefault(), "+%.2f", group.getHeaderData().getIncome()), headerInfo.headerLeft + 500, headerInfo.headerTop + 60, textPaint);
-
-        // 绘制支出文本
-        c.drawText(String.format(Locale.getDefault(), "-%.2f", group.getHeaderData().getExpense()), headerInfo.headerLeft + 800, headerInfo.headerTop + 60, textPaint);
-
-        // 绘制展开或收起的图标
-        //Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more); // 根据数据对象的isExpanded状态来选择不同的图标资源
-        // c.drawBitmap(bitmap, right - 50, 10, null); // 在右下角绘制图标
-    }
-
-    private static class HeaderInfo
-    {
-        private final int headerTop;
-        private final int headerBottom;
-        private final int headerLeft;
-        private final int headerRight;
-        private final int headerColor;
-
-        public HeaderInfo(View headerView)
-        {
-            this.headerTop = headerView.getTop();
-            this.headerBottom = headerView.getBottom();
-            this.headerLeft = headerView.getLeft();
-            this.headerRight = headerView.getRight();
-            Drawable background = headerView.getBackground();
-            this.headerColor = background instanceof ColorDrawable ? ((ColorDrawable) background).getColor() : Color.WHITE;
-        }
+        // 将头部 View 绘制到 RecyclerView 的画布上
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(headerInfo.getHeaderRight() - headerInfo.getHeaderLeft(), View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(headerInfo.getHeaderBottom() - headerInfo.getHeaderTop(), View.MeasureSpec.EXACTLY);
+        headerView.measure(widthSpec, heightSpec);
+        headerView.layout(headerInfo.getHeaderLeft(), headerInfo.getHeaderTop(), headerInfo.getHeaderRight(), headerInfo.getHeaderBottom());
+        headerView.draw(c);
     }
 }
