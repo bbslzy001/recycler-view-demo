@@ -26,6 +26,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.dataList = dataList;
     }
 
+    public List<Group> getDataList()
+    {
+        return dataList;
+    }
+
     @Override
     public int getItemCount()
     {

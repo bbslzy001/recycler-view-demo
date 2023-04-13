@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setAdapter(adapter);
 
-        recyclerView.addItemDecoration(new MyItemDecoration(headerHeight, headerPositionList, adapter));
+        recyclerView.addItemDecoration(new MyItemDecoration(this, adapter));
     }
 
     private List<Group> getFakeData()

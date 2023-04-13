@@ -27,4 +27,14 @@ public class HeaderData
     {
         return expense;
     }
+
+    @Override
+    public String toString()
+    {
+        return "HeaderData{" +
+                "date='" + date + '\'' +
+                ", income=" + income +
+                ", expense=" + expense +
+                '}';
+    }
 }

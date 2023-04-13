@@ -41,4 +41,14 @@ public class Group
     {
         isExpanded = expanded;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Group{" +
+                "mHeaderData=" + mHeaderData.toString() +
+                ", mItemDataList=" + mItemDataList.toString() +
+                ", isExpanded=" + isExpanded +
+                '}';
+    }
 }
