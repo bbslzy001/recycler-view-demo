@@ -17,12 +17,12 @@ import java.util.Locale;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
-    public static final int VIEW_TYPE_HEADER = 0;
-    public static final int VIEW_TYPE_ITEM = 1;
-    private final List<Group> dataList;
+    public static final int VIEW_TYPE_HEADER = 0;  // 列表头
+    public static final int VIEW_TYPE_ITEM = 1;  // 列表项
+    private final List<Group> dataList;  // 所有组所构成的List
     private final Context context;
 
-    public MyAdapter(Context context, List<Group> dataList)
+    public MyAdapter(@NonNull Context context, List<Group> dataList)
     {
         this.context = context;
         this.dataList = dataList;
@@ -36,13 +36,12 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public int getItemCount()
     {
-        int count = 0;
+        int count = dataList.size();  // 统计列表头的数目
         for (Group group : dataList)
         {
-            count++;  // 统计每个组的头部
-            if (group.isExpanded())
+            if (group.isExpanded())  // 如果该组处于展开装填
             {
-                count += group.getItemCount() - 1;  // 统计每个组展开后的项数
+                count += group.getItemCount() - 1;  // 统计对应的列表项的数目
             }
         }
         return count;
@@ -52,24 +51,24 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemViewType(int position)
     {
         int count = 0;  // 定义一个计数器
-        for (Group group : dataList)  // 遍历数据列表中的每一个组
+        for (Group group : dataList)  // 遍历所有组
         {
-            if (position == count)  // 如果当前位置等于计数器的值，则说明这是一个组的头部
+            if (position == count)  // 如果position等于计数器的值，则说明该位置是一个列表头
             {
-                return VIEW_TYPE_HEADER;  // 返回头部视图类型
+                return VIEW_TYPE_HEADER;  // 返回列表头的视图类型
             }
             ++count;
-            if (group.isExpanded())  // 如果这个组是展开状态
+            if (group.isExpanded())  // 如果该组处于展开状态
             {
-                int size = group.getItemCount();  // 获取该组中列表项的数量
-                if (position < count + size - 1)  // 如果当前位置在该组的范围内
+                int size = group.getItemCount() - 1;  // 获取该组中列表项的数目
+                if (position < count + size)  // 如果position在该组的范围内
                 {
-                    return VIEW_TYPE_ITEM;  // 返回列表项视图类型
+                    return VIEW_TYPE_ITEM;  // 返回列表项的视图类型
                 }
-                count += size - 1;  // 计数器加上该组中列表项的数量，再减去1
+                count += size;  // 计数器加上该组中列表项的数目
             }
         }
-        throw new IllegalArgumentException("Invalid position " + position);  // 如果没有找到对应的视图类型，则抛出异常
+        throw new IllegalArgumentException("Invalid position");  // 如果没有找到对应的视图类型，则抛出异常
     }
 
     @NonNull
@@ -104,15 +103,15 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             count++;
             if (group.isExpanded())
             {
-                int size = group.getItemCount();
-                if (position < count + size - 1)
+                int size = group.getItemCount() - 1;
+                if (position < count + size)
                 {
                     ItemViewHolder itemHolder = (ItemViewHolder) holder;
                     ItemData itemData = group.getItemData(position - count + 1);
                     itemHolder.bind(itemData);
                     break;
                 }
-                count += size - 1;
+                count += size;
             }
         }
     }
@@ -164,9 +163,9 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 count++;
                 if (group.isExpanded())
                 {
-                    int size = group.getItemCount();
-                    if (position < count + size - 1) return;
-                    count += size - 1;
+                    int size = group.getItemCount() - 1;
+                    if (position < count + size) return;
+                    count += size;
                 }
             }
         }
@@ -197,7 +196,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         public void onClick(View view)
         {
-            Log.d("test", "onClick: "+amount.getText());
+            Log.d("test", "onClick: " + amount.getText());
         }
     }
 
@@ -222,12 +221,9 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 count++;
                 if (group.isExpanded())
                 {
-                    int size = group.getItemCount();
-                    if (position < count + size - 1)
-                    {
-                        break;
-                    }
-                    count += size - 1;
+                    int size = group.getItemCount() - 1;
+                    if (position < count + size) break;
+                    count += size;
                 }
             }
             offsetList.add(headerIndex);

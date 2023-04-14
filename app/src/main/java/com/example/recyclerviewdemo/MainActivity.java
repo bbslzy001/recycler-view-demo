@@ -28,17 +28,25 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 将假数据绑定到Adapter上
-        adapter = new MyAdapter(this, getFakeData());
+        initRecyclerView();
+    }
 
-        // 初始化RecyclerView
+    /**
+     * 初始化 RecyclerView
+     */
+    private void initRecyclerView()
+    {
         recyclerView = findViewById(R.id.recycler_view);
-        recyclerView.setAdapter(adapter);
 
+        adapter = new MyAdapter(this, getFakeData());  // 将假数据绑定到Adapter上
+        recyclerView.setAdapter(adapter);  // 将Adapter绑定到RecyclerView上
         recyclerView.addItemDecoration(new MyItemDecoration(this, adapter));
         recyclerView.addOnItemTouchListener(new MyItemTouchListener());
     }
 
+    /**
+     * 生成假数据
+     */
     private List<Group> getFakeData()
     {
         List<Group> dataList = new ArrayList<>();
@@ -77,13 +85,14 @@ public class MainActivity extends AppCompatActivity
             int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的item的类型
             if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是组的头部
             {
-                if (headerInfo == null)
-                    headerInfo = new HeaderInfo(rv.getChildAt(firstVisiblePosition));
+                if (headerInfo == null) headerInfo = new HeaderInfo(rv.getChildAt(firstVisiblePosition));
             }
 
             // 获取触摸事件的坐标
-            float x = e.getX();
-            float y = e.getY();
+            // 参数 0 表示获取第一个触摸点的坐标，以避免数组越界异常
+            // 注意：下面的代码仅适用于单点触摸事件
+            float x = e.getX(0);
+            float y = e.getY(0);
             // 获取触摸事件的动作
             int action = e.getAction();
             // 如果是按下动作
