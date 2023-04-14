@@ -2,9 +2,9 @@ package com.example.recyclerviewdemo;
 
 public class HeaderData
 {
-    private String date;
-    private double income;
-    private double expense;
+    private final String date;
+    private final double income;
+    private final double expense;
 
     public HeaderData(String date, double income, double expense)
     {
@@ -26,15 +26,5 @@ public class HeaderData
     public double getExpense()
     {
         return expense;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "HeaderData{" +
-                "date='" + date + '\'' +
-                ", income=" + income +
-                ", expense=" + expense +
-                '}';
     }
 }

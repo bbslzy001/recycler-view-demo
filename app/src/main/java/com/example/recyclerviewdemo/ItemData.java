@@ -2,9 +2,9 @@ package com.example.recyclerviewdemo;
 
 public class ItemData
 {
-    private String time;
-    private String name;
-    private double amount;
+    private final String time;
+    private final String name;
+    private final double amount;
 
     public ItemData(String time, String name, double amount)
     {

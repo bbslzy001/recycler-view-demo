@@ -18,7 +18,7 @@ import java.util.Objects;
 public class MyItemDecoration extends RecyclerView.ItemDecoration
 {
     private final MyAdapter adapter;
-    private Context context;
+    private final Context context;
     private HeaderInfo headerInfo;
 
     public MyItemDecoration(Context context, MyAdapter adapter)
@@ -41,8 +41,7 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration
         int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的item的类型
         if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是组的头部
         {
-            if (headerInfo == null)
-                headerInfo = new HeaderInfo(parent.getChildAt(firstVisiblePosition));
+            if (headerInfo == null) headerInfo = new HeaderInfo(parent.getChildAt(firstVisiblePosition));
         }
 
         List<Integer> offsetList = adapter.getGroupIndexList();  // 获取所有 view 对应的 group 下标
