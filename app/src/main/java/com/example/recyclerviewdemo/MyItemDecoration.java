@@ -22,8 +22,7 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
     private final Context context;
     private HeaderInfo headerInfo;
     private Group currentGroup;
-    private View headerView;
-    private ImageView arrowImageView;
+    private View currentHeaderView;
 
     public MyItemDecoration(Context context, MyAdapter adapter)
     {
@@ -31,61 +30,90 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
         this.adapter = adapter;
     }
 
+    /**
+     * 初始化 HeaderInfo
+     */
+    private void initHeaderInfo(RecyclerView recyclerView, int firstVisiblePosition)
+    {
+        int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的 item 的类型
+        if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是列表头
+        {
+            headerInfo = new HeaderInfo(recyclerView.getChildAt(firstVisiblePosition));
+        }
+    }
+
+    /**
+     * 获取第一个可见item的位置
+     */
+    private int getFirstVisiblePosition(RecyclerView recyclerView)
+    {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        return Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
+    }
+
+    /**
+     * 当 recyclerview 存在数据的时候，程序启动一定先执行 onDrawOver() 再执行 onInterceptTouchEvent()
+     */
     @Override
     public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state)
     {
-        if (state.isMeasuring() || adapter.getItemCount() == 0)  // 如果recyclerview正在进行布局前的准备工作或数据为空
+        if (state.isMeasuring() || adapter.getItemCount() == 0)  // 如果 recyclerview 正在进行布局前的准备工作或数据为空
         {
             return; // 直接返回，不做任何操作
         }
 
-        LinearLayoutManager layoutManager = (LinearLayoutManager) parent.getLayoutManager();
-        int firstVisiblePosition = Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
+        int firstVisiblePosition = getFirstVisiblePosition(parent);  // 获取第一个可见的 item 的位置
 
-        int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的item的类型
-        if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是列表头
-        {
-            if (headerInfo == null) headerInfo = new HeaderInfo(parent.getChildAt(firstVisiblePosition));
-        }
+        if (headerInfo == null) initHeaderInfo(parent, firstVisiblePosition);  // 初始化 headerInfo
 
         List<Integer> offsetList = adapter.getGroupIndexList();  // 获取所有 view 对应的 group 下标
         Group group = adapter.getDataList().get(offsetList.get(firstVisiblePosition)); // 获取当前组对象
 
-        if (currentGroup == null || currentGroup != group)  // 更新列表头
+        if (currentGroup == null || currentGroup != group)
         {
             currentGroup = group;
-            headerView = getHeaderView(parent, currentGroup);
+            currentHeaderView = createHeaderView(parent, group);  // 初始化一个新的列表头
         }
-        drawFloatingHeader(c, headerView);
+
+        drawFloatingHeader(c);
     }
 
     /**
-     * 创建一个新的 HeaderView 对象，并将列表头内容绘制到该视图上
+     * 创建一个新的悬浮列表头
      */
-    private View getHeaderView(RecyclerView parent, Group group)
+    private View createHeaderView(RecyclerView recyclerView, Group group)
     {
-        View headerView = LayoutInflater.from(context).inflate(R.layout.header_recycler_view, parent, false);
+        View headerView = LayoutInflater.from(context).inflate(R.layout.header_recycler_view, recyclerView, false);
         TextView dateTextView = headerView.findViewById(R.id.header_date);
         TextView incomeTextView = headerView.findViewById(R.id.header_income);
         TextView expenseTextView = headerView.findViewById(R.id.header_expense);
-        arrowImageView = headerView.findViewById(R.id.header_button);
+        ImageView imageView = headerView.findViewById(R.id.header_button);
         dateTextView.setText(group.getHeaderData().getDate());
         incomeTextView.setText(String.format(Locale.getDefault(), "+%.2f", group.getHeaderData().getIncome()));
         expenseTextView.setText(String.format(Locale.getDefault(), "-%.2f", group.getHeaderData().getExpense()));
-        arrowImageView.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
+        imageView.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
         return headerView;
+    }
+
+    /**
+     * 更新悬浮列表头
+     */
+    private void updateHeaderView()
+    {
+        ImageView imageView = currentHeaderView.findViewById(R.id.header_button);
+        imageView.setImageResource(currentGroup.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
     }
 
     /**
      * 将 HeaderView 绘制到 RecyclerView 的画布上
      */
-    private void drawFloatingHeader(Canvas canvas, View headerView)
+    private void drawFloatingHeader(Canvas canvas)
     {
         int widthSpec = View.MeasureSpec.makeMeasureSpec(headerInfo.getHeaderRight() - headerInfo.getHeaderLeft(), View.MeasureSpec.EXACTLY);
         int heightSpec = View.MeasureSpec.makeMeasureSpec(headerInfo.getHeaderBottom() - headerInfo.getHeaderTop(), View.MeasureSpec.EXACTLY);
-        headerView.measure(widthSpec, heightSpec);
-        headerView.layout(headerInfo.getHeaderLeft(), headerInfo.getHeaderTop(), headerInfo.getHeaderRight(), headerInfo.getHeaderBottom());
-        headerView.draw(canvas);
+        currentHeaderView.measure(widthSpec, heightSpec);
+        currentHeaderView.layout(headerInfo.getHeaderLeft(), headerInfo.getHeaderTop(), headerInfo.getHeaderRight(), headerInfo.getHeaderBottom());
+        currentHeaderView.draw(canvas);
     }
 
     /**
@@ -101,40 +129,39 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
         return x >= headerInfo.getHeaderLeft() && x <= headerInfo.getHeaderRight() && y >= headerInfo.getHeaderTop() && y <= headerInfo.getHeaderBottom();
     }
 
+    /**
+     * 将 recyclerview 滚动至列表头原位置
+     */
+    private void autoScroll(RecyclerView recyclerView)
+    {
+        List<Integer> offsetList = adapter.getGroupIndexList();  // 获取所有 view 对应的 group 下标
+        int firstVisiblePosition = getFirstVisiblePosition(recyclerView);
+        int groupIndex = offsetList.get(firstVisiblePosition);  // 获取当前组的下标
+        for (int i = 0; i < offsetList.size(); ++i)
+        {
+            if (offsetList.get(i) == groupIndex)
+            {
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null) layoutManager.scrollToPositionWithOffset(i, 0);
+                return;
+            }
+        }
+    }
+
     @Override
     public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e)
     {
-        if (adapter.getItemCount() == 0) return false;  // 如果recyclerView数据为空
-
-        LinearLayoutManager layoutManager = (LinearLayoutManager) rv.getLayoutManager();
-        int firstVisiblePosition = Objects.requireNonNull(layoutManager).findFirstVisibleItemPosition();
-        int firstVisibleViewType = adapter.getItemViewType(firstVisiblePosition); // 获取第一个可见的item的类型
-        if (firstVisibleViewType == MyAdapter.VIEW_TYPE_HEADER)  // 如果是组的头部
-        {
-            if (headerInfo == null) headerInfo = new HeaderInfo(rv.getChildAt(firstVisiblePosition));
-        }
+        if (adapter.getItemCount() == 0) return false;  // 如果 recyclerView 数据为空
 
         // 参数 0 表示获取第一个触摸点的坐标，以避免数组越界异常
-        // 注意：下面的代码仅适用于单点触摸事件
-        if (isFloatingHeaderClicked(e.getX(0), e.getY(0), e.getAction()))
-        {
-            List<Integer> offsetList = adapter.getGroupIndexList();  // 获取所有 view 对应的 group 下标
-            int groupIndex = offsetList.get(firstVisiblePosition);  // 获取当前组的下标
-            Group group = adapter.getDataList().get(groupIndex); // 获取当前组对象
-            adapter.onHeaderClick(group);  // 折叠/展开列表头，更新视图
-            arrowImageView.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
-            for (int i = 0; i < offsetList.size(); ++i)
-            {
-                if (offsetList.get(i) == groupIndex)  // 获取悬浮列表头在recyclerview中的位置
-                {
-                    // 点击悬浮列表头，自动将recyclerview滚动到该列表头所在位置
-                    Objects.requireNonNull(layoutManager).scrollToPositionWithOffset(i, 0);
-                    break;
-                }
-            }
-            return true;  // 拦截触摸事件，不再传递给子View
-        }
-        return false;  // 否则，按照默认的逻辑处理触摸事件
+        // 注意：下面的代码仅适用于判断单点触摸事件
+        if (!isFloatingHeaderClicked(e.getX(0), e.getY(0), e.getAction())) return false;
+
+        adapter.onHeaderClick(currentGroup);  // 折叠或展开列表头，更新 recyclerview
+        updateHeaderView();  // 更新悬浮列表头
+        autoScroll(rv);  // 将 recyclerview 滚动至列表头原位置
+
+        return true;  // 拦截触摸事件，不再传递给子 view
     }
 
     @Override
