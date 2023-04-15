@@ -116,12 +116,6 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public void onHeaderClick(Group group)
-    {
-        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-        notifyDataSetChanged();  // 更新视图
-    }
-
     private class HeaderViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private final TextView date;
@@ -198,6 +192,15 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         {
             Log.d("test", "onClick: " + amount.getText());
         }
+    }
+
+    /**
+     * 列表头点击事件
+     */
+    public void onHeaderClick(Group group)
+    {
+        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
+        notifyDataSetChanged();  // 更新视图
     }
 
     /**
