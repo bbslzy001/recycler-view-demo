@@ -22,14 +22,14 @@ public class Group
         return subItemList.size() + 1; // 分组标题占据一项
     }
 
-    public HeaderItem getHeaderData()
+    public HeaderItem getHeaderItem()
     {
         return headerItem;
     }
 
-    public SubItem getItemData(int position)
+    public SubItem getSubItem(int position)
     {
-        return subItemList.get(position - 1); // 减去分组标题项
+        return subItemList.get(position);
     }
 
     public boolean isExpanded()

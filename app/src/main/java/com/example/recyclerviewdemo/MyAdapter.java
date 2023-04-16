@@ -17,102 +17,107 @@ import java.util.Locale;
 
 public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
-    public static final int VIEW_TYPE_HEADER = 0;  // 列表头
-    public static final int VIEW_TYPE_ITEM = 1;  // 列表项
-    private final List<Group> dataList;  // 所有组所构成的List
+    public static final int HEADER_ITEM = 0;  // 列表头
+    public static final int SUB_ITEM = 1;  // 列表项
+    private final List<Group> groupList;  // 所有 Group 所构成的 List
+    private List<ItemInfo> itemInfoList;  // 所有 Item 的信息 所构成的 List
     private final Context context;
 
-    public MyAdapter(@NonNull Context context, List<Group> dataList)
+    public MyAdapter(@NonNull Context context, List<Group> groupList)
     {
         this.context = context;
-        this.dataList = dataList;
+        this.groupList = groupList;
+        calculateItemInfoList();
     }
 
-    public List<Group> getDataList()
+    public List<Group> getGroupList()
     {
-        return dataList;
+        return groupList;
+    }
+
+    public int getGroupIndex(int position)
+    {
+        return itemInfoList.get(position).groupIndex;
+    }
+
+    public int getSubItemIndex(int position)
+    {
+        return itemInfoList.get(position).subItemIndex;
+    }
+
+    /**
+     * 列表头点击事件
+     */
+    public void onHeaderClick(Group group)
+    {
+        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
+        notifyDataSetChanged();  // 更新视图（待修改）
+        calculateItemInfoList();  // 重新计算所有 Item 的信息
+    }
+
+    /**
+     * 计算所有 Item 的信息，并更新到私有属性 itemInfoList 上
+     */
+    private void calculateItemInfoList()
+    {
+        itemInfoList = new ArrayList<>();
+        for (int groupIndex = 0; groupIndex < groupList.size(); ++groupIndex)
+        {
+            // 记录列表头
+            itemInfoList.add(new ItemInfo(groupIndex, HEADER_ITEM, -1));
+
+            // 记录对应的列表项
+            Group group = groupList.get(groupIndex);
+            if (group.isExpanded())
+            {
+                for (int subItemIndex = 0; subItemIndex < group.getItemCount() - 1; ++subItemIndex)
+                    itemInfoList.add(new ItemInfo(groupIndex, SUB_ITEM, subItemIndex));
+            }
+        }
     }
 
     @Override
     public int getItemCount()
     {
-        int count = dataList.size();  // 统计列表头的数目
-        for (Group group : dataList)
-        {
-            if (group.isExpanded())  // 如果该组处于展开装填
-            {
-                count += group.getItemCount() - 1;  // 统计对应的列表项的数目
-            }
-        }
-        return count;
+        return itemInfoList.size();
     }
 
     @Override
     public int getItemViewType(int position)
     {
-        int count = 0;  // 定义一个计数器
-        for (Group group : dataList)  // 遍历所有组
-        {
-            if (position == count)  // 如果position等于计数器的值，则说明该位置是一个列表头
-            {
-                return VIEW_TYPE_HEADER;  // 返回列表头的视图类型
-            }
-            ++count;
-            if (group.isExpanded())  // 如果该组处于展开状态
-            {
-                int size = group.getItemCount() - 1;  // 获取该组中列表项的数目
-                if (position < count + size)  // 如果position在该组的范围内
-                {
-                    return VIEW_TYPE_ITEM;  // 返回列表项的视图类型
-                }
-                count += size;  // 计数器加上该组中列表项的数目
-            }
-        }
-        throw new IllegalArgumentException("Invalid position");  // 如果没有找到对应的视图类型，则抛出异常
+        return itemInfoList.get(position).itemType;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
     {
-        if (viewType == VIEW_TYPE_HEADER)
+        if (viewType == HEADER_ITEM)
         {
             View view = LayoutInflater.from(context).inflate(R.layout.header_recycler_view, parent, false);
             return new HeaderViewHolder(view);
         }
-        else if (viewType == VIEW_TYPE_ITEM)
+        else
         {
             View view = LayoutInflater.from(context).inflate(R.layout.item_recycler_view, parent, false);
             return new ItemViewHolder(view);
         }
-        throw new IllegalArgumentException("Invalid view type");
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
-        int count = 0;
-        for (Group group : dataList)
+        ItemInfo itemInfo = itemInfoList.get(position);  // 获取当前 position 对应的 Item 的信息
+        Group group = groupList.get(itemInfo.groupIndex);  // 获取当前 Item 对应的 Group
+        if (itemInfo.itemType == HEADER_ITEM)
         {
-            if (position == count)
-            {
-                HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
-                headerHolder.bind(group);
-                break;
-            }
-            count++;
-            if (group.isExpanded())
-            {
-                int size = group.getItemCount() - 1;
-                if (position < count + size)
-                {
-                    ItemViewHolder itemHolder = (ItemViewHolder) holder;
-                    SubItem subItem = group.getItemData(position - count + 1);
-                    itemHolder.bind(subItem);
-                    break;
-                }
-                count += size;
-            }
+            HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
+            headerHolder.bind(group);
+        }
+        else
+        {
+            ItemViewHolder itemHolder = (ItemViewHolder) holder;
+            itemHolder.bind(group.getSubItem(itemInfo.subItemIndex));
         }
     }
 
@@ -135,7 +140,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         public void bind(Group group)
         {
-            HeaderItem headerItem = group.getHeaderData();
+            HeaderItem headerItem = group.getHeaderItem();
             date.setText(headerItem.getDate());
             income.setText(String.format(Locale.getDefault(), "+%.2f", headerItem.getIncome()));
             expense.setText(String.format(Locale.getDefault(), "-%.2f", headerItem.getExpense()));
@@ -146,22 +151,8 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public void onClick(View view)
         {
             int position = getAdapterPosition();  // 获取ViewHolder的位置
-            int count = 0;  // 计算当前分组在列表中的起始位置
-            for (Group group : dataList)
-            {
-                if (position == count)
-                {
-                    onHeaderClick(group);
-                    return;
-                }
-                count++;
-                if (group.isExpanded())
-                {
-                    int size = group.getItemCount() - 1;
-                    if (position < count + size) return;
-                    count += size;
-                }
-            }
+            Group group = groupList.get(itemInfoList.get(position).groupIndex);  // 获取对应的 Group
+            onHeaderClick(group);
         }
     }
 
@@ -194,43 +185,24 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    /**
-     * 列表头点击事件
-     */
-    public void onHeaderClick(Group group)
+    private static class ItemInfo
     {
-        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-        notifyDataSetChanged();  // 更新视图
-    }
+        private final int groupIndex;
+        private final int itemType;
+        private final int subItemIndex;
 
-    /**
-     * 计算所有 view 对应的 group 下标
-     */
-    public List<Integer> getGroupIndexList()
-    {
-        int allCount = getItemCount();
-        List<Integer> offsetList = new ArrayList<>();
-        int headerIndex = -1;
-        for (int position = 0; position < allCount; ++position)
+        /**
+         * ItemInfo 的构造函数，用于保存一个 Item 的信息
+         *
+         * @param groupIndex   当前 Item 属于第几个 Group，从 0 开始计数
+         * @param itemType     当前 Item 属于 列表头类型 还是 列表项类型
+         * @param subItemIndex 当前 Item 属于 当前 Group 的第几个列表项  // 列表头值为 -1，列表项从 0 开始计数
+         */
+        public ItemInfo(int groupIndex, int itemType, int subItemIndex)
         {
-            int count = 0;
-            for (Group group : dataList)
-            {
-                if (position == count)
-                {
-                    ++headerIndex;
-                    break;
-                }
-                count++;
-                if (group.isExpanded())
-                {
-                    int size = group.getItemCount() - 1;
-                    if (position < count + size) break;
-                    count += size;
-                }
-            }
-            offsetList.add(headerIndex);
+            this.groupIndex = groupIndex;
+            this.itemType = itemType;
+            this.subItemIndex = subItemIndex;
         }
-        return offsetList;
     }
 }

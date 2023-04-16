@@ -2,14 +2,14 @@ package com.example.recyclerviewdemo;
 
 import android.view.View;
 
-public class HeaderInfo
+public class HeaderCoordinate
 {
     private final int headerTop;
     private final int headerBottom;
     private final int headerLeft;
     private final int headerRight;
 
-    public HeaderInfo(View headerView)
+    public HeaderCoordinate(View headerView)
     {
         this.headerTop = headerView.getTop();
         this.headerBottom = headerView.getBottom();
