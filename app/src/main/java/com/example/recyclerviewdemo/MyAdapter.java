@@ -107,8 +107,8 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 if (position < count + size)
                 {
                     ItemViewHolder itemHolder = (ItemViewHolder) holder;
-                    ItemData itemData = group.getItemData(position - count + 1);
-                    itemHolder.bind(itemData);
+                    SubItem subItem = group.getItemData(position - count + 1);
+                    itemHolder.bind(subItem);
                     break;
                 }
                 count += size;
@@ -135,10 +135,10 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         public void bind(Group group)
         {
-            HeaderData headerData = group.getHeaderData();
-            date.setText(headerData.getDate());
-            income.setText(String.format(Locale.getDefault(), "+%.2f", headerData.getIncome()));
-            expense.setText(String.format(Locale.getDefault(), "-%.2f", headerData.getExpense()));
+            HeaderItem headerItem = group.getHeaderData();
+            date.setText(headerItem.getDate());
+            income.setText(String.format(Locale.getDefault(), "+%.2f", headerItem.getIncome()));
+            expense.setText(String.format(Locale.getDefault(), "-%.2f", headerItem.getExpense()));
             toggle.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
         }
 
@@ -180,11 +180,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             itemView.setOnClickListener(this);   // 整个ItemViewHolder的点击事件绑定
         }
 
-        public void bind(ItemData itemData)
+        public void bind(SubItem subItem)
         {
-            time.setText(itemData.getTime());
-            name.setText(itemData.getName());
-            amount.setText(String.format(Locale.getDefault(), "%.2f", itemData.getAmount()));
+            time.setText(subItem.getTime());
+            name.setText(subItem.getName());
+            amount.setText(String.format(Locale.getDefault(), "%.2f", subItem.getAmount()));
         }
 
         @Override

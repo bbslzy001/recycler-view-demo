@@ -7,29 +7,29 @@ import java.util.List;
  */
 public class Group
 {
-    private final HeaderData headerData;
-    private final List<ItemData> itemDataList;
+    private final HeaderItem headerItem;
+    private final List<SubItem> subItemList;
     private boolean isExpanded = false;  // 是否展开
 
-    public Group(HeaderData headerData, List<ItemData> itemDataList)
+    public Group(HeaderItem headerItem, List<SubItem> subItemList)
     {
-        this.headerData = headerData;
-        this.itemDataList = itemDataList;
+        this.headerItem = headerItem;
+        this.subItemList = subItemList;
     }
 
     public int getItemCount()
     {
-        return itemDataList.size() + 1; // 分组标题占据一项
+        return subItemList.size() + 1; // 分组标题占据一项
     }
 
-    public HeaderData getHeaderData()
+    public HeaderItem getHeaderData()
     {
-        return headerData;
+        return headerItem;
     }
 
-    public ItemData getItemData(int position)
+    public SubItem getItemData(int position)
     {
-        return itemDataList.get(position - 1); // 减去分组标题项
+        return subItemList.get(position - 1); // 减去分组标题项
     }
 
     public boolean isExpanded()

@@ -1,12 +1,12 @@
 package com.example.recyclerviewdemo;
 
-public class HeaderData
+public class HeaderItem
 {
     private final String date;
     private final double income;
     private final double expense;
 
-    public HeaderData(String date, double income, double expense)
+    public HeaderItem(String date, double income, double expense)
     {
         this.date = date;
         this.income = income;

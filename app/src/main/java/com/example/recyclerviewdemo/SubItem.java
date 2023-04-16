@@ -1,12 +1,12 @@
 package com.example.recyclerviewdemo;
 
-public class ItemData
+public class SubItem
 {
     private final String time;
     private final String name;
     private final double amount;
 
-    public ItemData(String time, String name, double amount)
+    public SubItem(String time, String name, double amount)
     {
         this.time = time;
         this.name = name;

@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
         for (int i = 0; i < 10; i++)
         {
             String dateStr = sdf.format(new Date(System.currentTimeMillis() + i * 24 * 60 * 60 * 1000L));
-            List<ItemData> itemDataList = new ArrayList<>();
+            List<SubItem> subItemList = new ArrayList<>();
             int transactionCount = random.nextInt(5) + 1;
             totalIncome = 0;
             totalExpense = 0;
@@ -61,11 +61,11 @@ public class MainActivity extends AppCompatActivity
                 double amount = random.nextDouble() * 2000 - 1000; // 金额有正有负
                 totalIncome += amount >= 0 ? amount : 0;
                 totalExpense += amount < 0 ? -amount : 0;
-                ItemData itemData = new ItemData("16:00:00", "Item " + (j + 1), amount);
-                itemDataList.add(itemData);
+                SubItem subItem = new SubItem("16:00:00", "Item " + (j + 1), amount);
+                subItemList.add(subItem);
             }
-            HeaderData headerData = new HeaderData(dateStr, totalIncome, totalExpense);
-            dataList.add(new Group(headerData, itemDataList));
+            HeaderItem headerItem = new HeaderItem(dateStr, totalIncome, totalExpense);
+            dataList.add(new Group(headerItem, subItemList));
         }
         return dataList;
     }
