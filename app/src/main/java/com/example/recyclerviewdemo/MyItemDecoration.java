@@ -110,10 +110,10 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
      */
     private void drawFloatingHeader(Canvas canvas)
     {
-        int widthSpec = View.MeasureSpec.makeMeasureSpec(headerCoordinate.getHeaderRight() - headerCoordinate.getHeaderLeft(), View.MeasureSpec.EXACTLY);
-        int heightSpec = View.MeasureSpec.makeMeasureSpec(headerCoordinate.getHeaderBottom() - headerCoordinate.getHeaderTop(), View.MeasureSpec.EXACTLY);
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(headerCoordinate.headerRight - headerCoordinate.headerLeft, View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(headerCoordinate.headerBottom - headerCoordinate.headerTop, View.MeasureSpec.EXACTLY);
         currentHeaderView.measure(widthSpec, heightSpec);
-        currentHeaderView.layout(headerCoordinate.getHeaderLeft(), headerCoordinate.getHeaderTop(), headerCoordinate.getHeaderRight(), headerCoordinate.getHeaderBottom());
+        currentHeaderView.layout(headerCoordinate.headerLeft, headerCoordinate.headerTop, headerCoordinate.headerRight, headerCoordinate.headerBottom);
         currentHeaderView.draw(canvas);
     }
 
@@ -127,7 +127,7 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
     private boolean isFloatingHeaderClicked(float x, float y, int action)
     {
         if (action != MotionEvent.ACTION_DOWN) return false;
-        return x >= headerCoordinate.getHeaderLeft() && x <= headerCoordinate.getHeaderRight() && y >= headerCoordinate.getHeaderTop() && y <= headerCoordinate.getHeaderBottom();
+        return x >= headerCoordinate.headerLeft && x <= headerCoordinate.headerRight && y >= headerCoordinate.headerTop && y <= headerCoordinate.headerBottom;
     }
 
     /**
@@ -167,5 +167,21 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
     @Override
     public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept)
     {
+    }
+
+    private static class HeaderCoordinate
+    {
+        private final int headerTop;
+        private final int headerBottom;
+        private final int headerLeft;
+        private final int headerRight;
+
+        public HeaderCoordinate(View headerView)
+        {
+            this.headerTop = headerView.getTop();
+            this.headerBottom = headerView.getBottom();
+            this.headerLeft = headerView.getLeft();
+            this.headerRight = headerView.getRight();
+        }
     }
 }
