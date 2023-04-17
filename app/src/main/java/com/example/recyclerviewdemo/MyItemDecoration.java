@@ -2,7 +2,6 @@ package com.example.recyclerviewdemo;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -92,17 +91,8 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
         dateTextView.setText(group.getHeaderItem().getDate());
         incomeTextView.setText(String.format(Locale.getDefault(), "+%.2f", group.getHeaderItem().getIncome()));
         expenseTextView.setText(String.format(Locale.getDefault(), "-%.2f", group.getHeaderItem().getExpense()));
-        imageView.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
+        imageView.setImageResource(group.isExpanded() ? R.drawable.ic_expand_more : R.drawable.ic_expand_less);
         return headerView;
-    }
-
-    /**
-     * 更新悬浮列表头
-     */
-    private void updateHeaderView()
-    {
-        ImageView imageView = currentHeaderView.findViewById(R.id.header_button);
-        imageView.setImageResource(currentGroup.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
     }
 
     /**
@@ -130,19 +120,6 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
         return x >= headerCoordinate.headerLeft && x <= headerCoordinate.headerRight && y >= headerCoordinate.headerTop && y <= headerCoordinate.headerBottom;
     }
 
-    /**
-     * 将 recyclerview 滚动至列表头原位置
-     */
-    private void autoScroll(RecyclerView recyclerView)
-    {
-        int firstVisiblePosition = getFirstVisiblePosition(recyclerView);
-        int subItemIndex = adapter.getSubItemIndex(firstVisiblePosition);
-        Log.d("test", "autoScroll: " + firstVisiblePosition + " " + subItemIndex);
-        int headerItemIndex = firstVisiblePosition - subItemIndex - 1;
-        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        if (layoutManager != null) layoutManager.scrollToPositionWithOffset(headerItemIndex, 0);
-    }
-
     @Override
     public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e)
     {
@@ -152,9 +129,15 @@ public class MyItemDecoration extends RecyclerView.ItemDecoration implements Rec
         // 注意：下面的代码仅适用于判断单点触摸事件
         if (!isFloatingHeaderClicked(e.getX(0), e.getY(0), e.getAction())) return false;
 
-        autoScroll(rv);  // 将 recyclerview 滚动至列表头原位置
-        adapter.onHeaderClick(currentGroup);  // 折叠或展开列表头，更新 recyclerview
-        updateHeaderView();  // 更新悬浮列表头
+        // 将 recyclerview 滚动至列表头原位置
+        int firstVisiblePosition = getFirstVisiblePosition(rv);
+        int subItemIndex = adapter.getSubItemIndex(firstVisiblePosition);
+        int headerItemIndex = firstVisiblePosition - subItemIndex - 1;
+        LinearLayoutManager layoutManager = (LinearLayoutManager) rv.getLayoutManager();
+        if (layoutManager != null) layoutManager.scrollToPositionWithOffset(headerItemIndex, 0);
+
+        // 悬浮列表头点击事件
+        adapter.onHeaderClick(currentHeaderView, currentGroup, headerItemIndex);
 
         return true;  // 拦截触摸事件，不再传递给子 view
     }

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,13 +47,31 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     /**
-     * 列表头点击事件
+     * 列表头/悬浮列表头 点击事件：
+     * 更改 group 的 isExpanded 属性；
+     * RecyclerView 视图局部刷新；
+     * 重新计算所有 Item 的信息；
+     * 刷新 列表头/悬浮列表头 的视图。
+     *
+     * @param view     列表头对应的 View
+     * @param group    列表头所在的 Group
+     * @param position 列表头在所有 Item 中的位置，从 0 开始计数
      */
-    public void onHeaderClick(Group group)
+    public void onHeaderClick(View view, Group group, int position)
     {
-        group.setExpanded(!group.isExpanded());  // 将分组的isExpanded状态取反
-        notifyDataSetChanged();  // 更新视图（待修改）
+        if (group.isExpanded())
+        {
+            group.setExpanded(false);
+            notifyItemRangeRemoved(position + 1, group.getItemCount() - 1);
+        }
+        else
+        {
+            group.setExpanded(true);
+            notifyItemRangeInserted(position + 1, group.getItemCount() - 1);
+        }
         calculateItemInfoList();  // 重新计算所有 Item 的信息
+        ImageView imageView = view.findViewById(R.id.header_button);
+        imageView.setImageResource(group.isExpanded() ? R.drawable.ic_expand_more : R.drawable.ic_expand_less);
     }
 
     /**
@@ -144,7 +163,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             date.setText(headerItem.getDate());
             income.setText(String.format(Locale.getDefault(), "+%.2f", headerItem.getIncome()));
             expense.setText(String.format(Locale.getDefault(), "-%.2f", headerItem.getExpense()));
-            toggle.setImageResource(group.isExpanded() ? R.drawable.expand_less : R.drawable.expand_more);
+            toggle.setImageResource(group.isExpanded() ? R.drawable.ic_expand_more : R.drawable.ic_expand_less);
         }
 
         @Override
@@ -152,11 +171,11 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         {
             int position = getAdapterPosition();  // 获取ViewHolder的位置
             Group group = groupList.get(itemInfoList.get(position).groupIndex);  // 获取对应的 Group
-            onHeaderClick(group);
+            onHeaderClick(view, group, position);
         }
     }
 
-    private static class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    private class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener
     {
         private final TextView time;
         private final TextView name;
@@ -168,7 +187,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             time = itemView.findViewById(R.id.item_time);
             name = itemView.findViewById(R.id.item_name);
             amount = itemView.findViewById(R.id.item_amount);
-            itemView.setOnClickListener(this);   // 整个ItemViewHolder的点击事件绑定
+            itemView.setOnLongClickListener(this);   // 整个ItemViewHolder的长点击事件绑定
         }
 
         public void bind(SubItem subItem)
@@ -179,9 +198,10 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onClick(View view)
+        public boolean onLongClick(View view)
         {
-            Log.d("test", "onClick: " + amount.getText());
+            Toast.makeText(context, "当前列表项金额：" + amount.getText(), Toast.LENGTH_SHORT).show();
+            return true;
         }
     }
 
@@ -196,7 +216,7 @@ public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
          *
          * @param groupIndex   当前 Item 属于第几个 Group，从 0 开始计数
          * @param itemType     当前 Item 属于 列表头类型 还是 列表项类型
-         * @param subItemIndex 当前 Item 属于 当前 Group 的第几个列表项  // 列表头值为 -1，列表项从 0 开始计数
+         * @param subItemIndex 当前 Item 属于 当前 Group 的第几个列表项：列表头值为 -1，列表项从 0 开始计数
          */
         public ItemInfo(int groupIndex, int itemType, int subItemIndex)
         {
